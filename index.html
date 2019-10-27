@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>ktmTime.dyeoh.com</title>
+    <meta charset="UTF-8">
+    <meta name="title" content="ktmTime.dyeoh.com">
+    <meta name="description" content="A better KTM train schedule">
+    <meta name="author" content="Desmond Yeoh">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta property="og:site_name" content="ktmTime.dyeoh.com">
+    <meta property="og:title" content="ktmTime.dyeoh.com" />
+    <meta property="og:description" content="A better KTM train schedule" />
+    <meta property="og:image" content="https://assets.nst.com.my/images/articles/25_Komuter_1516803629.jpg" />
+    <meta property="og:type" content="website" />
+    <link href="https://fonts.googleapis.com/css?family=B612:400,700&display=swap" rel="stylesheet">
+    <style type="text/css">
+        * {
+            font-family: 'B612', sans-serif;
+        }
+        h1 {
+            margin-bottom: 0px;
+        }
+        label {
+            display: block;
+            margin: 10px;
+        }
+        .departed {
+            opacity: 0.3;
+        }
+        .incoming {
+
+        }
+        .minute-display {
+            color: gray;
+            font-size: 0.8em;
+        }
+        .departure-status {
+        }
+        #desc {
+            font-size: 0.8em;
+            color: #444;
+            margin: 5px 0 10px;
+        }
+        footer {
+            font-size: 0.8em;
+            color: #444;
+            margin: 30px 0;
+        }
+        #output {
+            margin: 10px;
+        }
+
+    </style>
+</head>
+<body>
+    <center>
+        <header>
+            <h1>ktmTime.dyeoh.com</h1>
+            <p id='desc'>
+                A better KTMB train schedule<br/>
+            </p>
+            <select name="startVenue"></select>
+            <select name="endVenue"></select>
+            <br>
+            <label for="hideDeparted">
+                <input type="checkbox" name="hideDeparted" id="hideDeparted" checked/>
+                Hide Departed Trains
+            </label>
+            <p>Current Time: <script type="text/javascript">new Date</script></p>
+        </header>
+        <main>
+            <div id="output">Please select 2 different locations to get Schedule</div>
+        </main>
+        <footer>
+             Last updated: 11 Oct 2019<br/>
+             Got newer schedule? <a href="mailto:desmondyeoh11@gmail.com">(Email author)</a><br/>
+             Author's: 
+             <a href="https://github.com/desmondyeoh">GitHub</a> | 
+             <a href="https://www.linkedin.com/in/desmondyeoh/">LindkedIn</a> | 
+             <a href="https://fb.com/desmondyeoh">FB</a> | 
+             <a href="https://www.youtube.com/channel/UC7OMY1Qtii6R-XIpaxxBKXg">YouTube</a> | 
+             <a href="https://medium.com/@desmondyeoh">Medium</a>
+             <a href=""></a>
+
+        </footer>
+    </center>
+
+    <script
+      src="https://code.jquery.com/jquery-3.4.1.min.js"
+      integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo="
+      crossorigin="anonymous"></script>
+    <!-- <script type="text/javascript" src="https://momentjs.com/downloads/moment.js"></script> -->
+
+    <script type="text/javascript" src="data.js"></script>
+    <script type="text/javascript">
+        function renderTimeToNow(time) {
+            let now = new Date();
+            let hr = time.split(':')[0];
+            let min = time.split(':')[1];
+            let remain = (new Date().setHours(hr, min) - now) / 60 / 1000;
+            if (remain < 60) {
+                return remain + ' min';
+            } else {
+                return Math.floor(remain / 60) + ' hr ' + (remain % 60) + ' min';
+            }
+        }
+
+        function renderSchedule() {
+            console.log('render schedule');
+            let startVenue = $('select[name="startVenue"]').val();
+            let endVenue = $('select[name="endVenue"]').val();
+            let hideDeparted = $('#hideDeparted').prop('checked');
+            if (startVenue === endVenue) {
+                $('#output').text("Please select 2 different locations...");
+            } else if (INDEXES.indexOf(startVenue)>=0 && INDEXES.indexOf(endVenue)>=0){
+                let times = data[startVenue+':'+endVenue];
+                let html = "";
+                for (let i = 0; i < times.length; i++) {
+                    let s = times[i]['s'];
+                    let e = times[i]['e'];
+                    let d = times[i]['d'];
+                    let x = times[i]['x'];
+
+                    if (renderTimeToNow(s)[0] == '-') {
+                        if (!hideDeparted)
+                            html += "<p class='departed'><span class='minute-display departure-status'>Departed</span><br><strong>" + s + " -> " + e + "</strong><br/><span class='minute-display'>("+d+" min journey)"+(x?"(Express)":"")+"</span></p>";
+                    } else {
+                        html += "<p class='incoming'><span class='minute-display departure-status'>Departing in " + renderTimeToNow(s) + "...</span><br><strong>" + s + " -> " + e + "</strong><br/><span class='minute-display'>("+d+" min journey)</span>"+(x?"(Express)":"")+"</p>";
+                    }
+                }
+                $('#output').html(html);
+            }
+        }
+
+        function loadSavedState() {
+            console.log('loadSavedState()')
+            $('select[name="startVenue"]').val(localStorage.getItem('startVenue') || 'NoStartVenue').change();
+            $('select[name="endVenue"]').val(localStorage.getItem('endVenue') || 'NoStartVenue').change();
+            $('#hideStorage').prop('checked', localStorage.getItem('hideStorage') || true).change();
+
+        }
+
+        let INDEXES = Object.keys(data['i2p']);
+        let PLACES = Object.keys(data['p2i']);
+
+        $(document).ready(() => {
+            console.log(data['i2p'])
+            $('select[name="startVenue"]').append(new Option('From', 'NoStartVenue'));
+            $('select[name="endVenue"]').append(new Option('To', 'NoEndVenue'));
+
+            for (let key in data['i2p']) {
+                $('select[name="startVenue"]').append(new Option(data['i2p'][key], key));
+                $('select[name="endVenue"]').append(new Option(data['i2p'][key], key));
+            }
+            loadSavedState();
+            renderSchedule();
+            
+            $('select, input').change(() => {
+                localStorage.setItem('startVenue', $('select[name="startVenue"]').val());
+                localStorage.setItem('endVenue', $('select[name="endVenue"]').val());
+                localStorage.setItem('hideStorage', $('#hideStorage').prop('checked'));
+                renderSchedule();
+            });
+
+            // re-render every 10s
+            setInterval(function(){ renderSchedule(); }, 10000);
+        });
+    </script>
+</body>
+</html>
