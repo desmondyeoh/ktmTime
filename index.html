@@ -135,7 +135,7 @@
         function loadSavedState() {
             console.log('loadSavedState()')
             $('select[name="startVenue"]').val(localStorage.getItem('startVenue') || 'NoStartVenue').change();
-            $('select[name="endVenue"]').val(localStorage.getItem('endVenue') || 'NoStartVenue').change();
+            $('select[name="endVenue"]').val(localStorage.getItem('endVenue') || 'NoEndVenue').change();
             $('#hideStorage').prop('checked', localStorage.getItem('hideStorage') || true).change();
 
         }
