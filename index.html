@@ -49,6 +49,18 @@
         #output {
             margin: 10px;
         }
+        .btn-group button {
+            padding: 10px;
+            margin: 10px 2px;
+            background: white;
+            border-radius: 0%;
+        }
+        .btn-group button:focus {
+            outline: 0;
+        }
+        .btn-group .btn-active {
+            background: lightgray;
+        }
 
     </style>
 </head>
@@ -59,11 +71,15 @@
             <p id='desc'>
                 A better KTMB train schedule<br/>
             </p>
+            <div class="btn-group">
+                <button id="btn-batu" name="route" value="batu">Bt. Caves - P. Sebang</button>
+                <button id="btn-klang" name="route" value="klang">Tj. Malim - Klang</button>
+            </div>
             <select name="startVenue"></select>
             <select name="endVenue"></select>
             <br>
             <label for="hideDeparted">
-                <input type="checkbox" name="hideDeparted" id="hideDeparted" checked/>
+                <input type="checkbox" name="hideDeparted" id="hideDeparted"/>
                 Hide Departed Trains
             </label>
             <p>Current Time: <script type="text/javascript">new Date</script></p>
@@ -93,6 +109,43 @@
 
     <script type="text/javascript" src="data.js"></script>
     <script type="text/javascript">
+        let ROUTE = "";
+        let ROUTE_DATA = {};
+        let ROUTE_PREFIX = "";
+        let INDEXES = {};
+        let PLACES = {};
+
+        $(document).ready(() => {
+            loadSavedState();
+            renderSchedule();
+
+            $('.btn-group button').click(function () {
+                let route = $(this).val();
+                console.log("click btn: " + route)
+                localStorage.setItem('route', $(this).val());
+                updateRoute(route);
+            });
+            
+            $('select[name="startVenue"]').change(function() {
+                localStorage.setItem(ROUTE_PREFIX + 'startVenue', $(this).val());
+                renderSchedule();
+            });
+
+            $('select[name="endVenue"]').change(function() {
+                localStorage.setItem(ROUTE_PREFIX + 'endVenue', $('select[name="endVenue"]').val());
+                renderSchedule();
+            });
+
+            $('#hideDeparted').change(function() {
+                localStorage.setItem('hideDeparted', $('#hideDeparted').prop('checked'));
+                renderSchedule();
+            });
+
+            // re-render every 10s
+            setInterval(function(){ renderSchedule(); }, 10000);
+        });
+
+
         function renderTimeToNow(time) {
             let now = new Date();
             let hr = time.split(':')[0];
@@ -113,7 +166,7 @@
             if (startVenue === endVenue) {
                 $('#output').text("Please select 2 different locations...");
             } else if (INDEXES.indexOf(startVenue)>=0 && INDEXES.indexOf(endVenue)>=0){
-                let times = data[startVenue+':'+endVenue];
+                let times = ROUTE_DATA[startVenue+':'+endVenue];
                 let html = "";
                 for (let i = 0; i < times.length; i++) {
                     let s = times[i]['s'];
@@ -134,37 +187,49 @@
 
         function loadSavedState() {
             console.log('loadSavedState()')
-            $('select[name="startVenue"]').val(localStorage.getItem('startVenue') || 'NoStartVenue').change();
-            $('select[name="endVenue"]').val(localStorage.getItem('endVenue') || 'NoEndVenue').change();
-            $('#hideStorage').prop('checked', localStorage.getItem('hideStorage') || true).change();
-
+            updateRoute(localStorage.getItem('route') || 'batu');
         }
 
-        let INDEXES = Object.keys(data['i2p']);
-        let PLACES = Object.keys(data['p2i']);
+        function populateSelection(routeData) {
+            $('#mySelect')
+                
+            $('select[name="startVenue"]')
+                .find('option').remove().end()
+                .append(new Option('From', 'NoStartVenue'));
+            $('select[name="endVenue"]')
+                .find('option').remove().end()
+                .append(new Option('To', 'NoEndVenue'));
 
-        $(document).ready(() => {
-            console.log(data['i2p'])
-            $('select[name="startVenue"]').append(new Option('From', 'NoStartVenue'));
-            $('select[name="endVenue"]').append(new Option('To', 'NoEndVenue'));
-
-            for (let key in data['i2p']) {
-                $('select[name="startVenue"]').append(new Option(data['i2p'][key], key));
-                $('select[name="endVenue"]').append(new Option(data['i2p'][key], key));
+            for (let key in routeData['i2p']) {
+                $('select[name="startVenue"]').append(new Option(routeData['i2p'][key], key));
+                $('select[name="endVenue"]').append(new Option(routeData['i2p'][key], key));
             }
-            loadSavedState();
-            renderSchedule();
-            
-            $('select, input').change(() => {
-                localStorage.setItem('startVenue', $('select[name="startVenue"]').val());
-                localStorage.setItem('endVenue', $('select[name="endVenue"]').val());
-                localStorage.setItem('hideStorage', $('#hideStorage').prop('checked'));
-                renderSchedule();
-            });
+        }
 
-            // re-render every 10s
-            setInterval(function(){ renderSchedule(); }, 10000);
-        });
+        function updateRoute(route) {
+            console.log("updateRoute");
+
+            if (route === 'batu') {
+                ROUTE_DATA = BATU_DATA;
+                ROUTE_PREFIX = 'batu_';
+                $('#btn-batu').addClass('btn-active');
+                $('#btn-klang').removeClass('btn-active');
+            } else if (route === 'klang') {
+                ROUTE_DATA = KLANG_DATA;
+                ROUTE_PREFIX = 'klang_';
+                $('#btn-klang').addClass('btn-active');
+                $('#btn-batu').removeClass('btn-active');
+            }
+
+            populateSelection(ROUTE_DATA);
+            INDEXES = Object.keys(ROUTE_DATA['i2p']);
+            PLACES = Object.keys(ROUTE_DATA['p2i']);
+
+            $('select[name="startVenue"]').val(localStorage.getItem(ROUTE_PREFIX + 'startVenue') || 'NoStartVenue').change();
+            $('select[name="endVenue"]').val(localStorage.getItem(ROUTE_PREFIX + 'endVenue') || 'NoEndVenue').change();
+            $('#hideDeparted').prop('checked', (localStorage.getItem('hideDeparted') || "true") == "true").change();
+        }
+
     </script>
     
     <!-- Global site tag (gtag.js) - Google Analytics -->
