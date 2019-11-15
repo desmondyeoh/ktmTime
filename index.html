@@ -28,7 +28,6 @@
             opacity: 0.3;
         }
         .incoming {
-
         }
         .minute-display {
             color: gray;
@@ -61,7 +60,6 @@
         .btn-group .btn-active {
             background: lightgray;
         }
-
     </style>
 </head>
 <body>
@@ -114,11 +112,17 @@
         let ROUTE_PREFIX = "";
         let INDEXES = {};
         let PLACES = {};
-
         $(document).ready(() => {
+
+            if (new Date().getDate()==16) {
+                $.ajax({
+                    url: "data/data_20191116.js",
+                    async: false,
+                    dataType: "script"
+                });
+            }
             loadSavedState();
             renderSchedule();
-
             $('.btn-group button').click(function () {
                 let route = $(this).val();
                 console.log("click btn: " + route)
@@ -130,22 +134,17 @@
                 localStorage.setItem(ROUTE_PREFIX + 'startVenue', $(this).val());
                 renderSchedule();
             });
-
             $('select[name="endVenue"]').change(function() {
                 localStorage.setItem(ROUTE_PREFIX + 'endVenue', $('select[name="endVenue"]').val());
                 renderSchedule();
             });
-
             $('#hideDeparted').change(function() {
                 localStorage.setItem('hideDeparted', $('#hideDeparted').prop('checked'));
                 renderSchedule();
             });
-
             // re-render every 10s
             setInterval(function(){ renderSchedule(); }, 10000);
         });
-
-
         function renderTimeToNow(time) {
             let now = new Date();
             let hr = time.split(':')[0];
@@ -157,7 +156,6 @@
                 return Math.floor(remain / 60) + ' hr ' + (remain % 60) + ' min';
             }
         }
-
         function renderSchedule() {
             console.log('render schedule');
             let startVenue = $('select[name="startVenue"]').val();
@@ -173,7 +171,6 @@
                     let e = times[i]['e'];
                     let d = times[i]['d'];
                     let x = times[i]['x'];
-
                     if (renderTimeToNow(s)[0] == '-') {
                         if (!hideDeparted)
                             html += "<p class='departed'><span class='minute-display departure-status'>Departed</span><br><strong>" + s + " -> " + e + "</strong><br/><span class='minute-display'>("+d+" min journey)"+(x?"(Express)":"")+"</span></p>";
@@ -184,12 +181,10 @@
                 $('#output').html(html);
             }
         }
-
         function loadSavedState() {
             console.log('loadSavedState()')
             updateRoute(localStorage.getItem('route') || 'batu');
         }
-
         function populateSelection(routeData) {
             $('#mySelect')
                 
@@ -199,16 +194,13 @@
             $('select[name="endVenue"]')
                 .find('option').remove().end()
                 .append(new Option('To', 'NoEndVenue'));
-
             for (let key in routeData['i2p']) {
                 $('select[name="startVenue"]').append(new Option(routeData['i2p'][key], key));
                 $('select[name="endVenue"]').append(new Option(routeData['i2p'][key], key));
             }
         }
-
         function updateRoute(route) {
             console.log("updateRoute");
-
             if (route === 'batu') {
                 ROUTE_DATA = BATU_DATA;
                 ROUTE_PREFIX = 'batu_';
@@ -220,16 +212,13 @@
                 $('#btn-klang').addClass('btn-active');
                 $('#btn-batu').removeClass('btn-active');
             }
-
             populateSelection(ROUTE_DATA);
             INDEXES = Object.keys(ROUTE_DATA['i2p']);
             PLACES = Object.keys(ROUTE_DATA['p2i']);
-
             $('select[name="startVenue"]').val(localStorage.getItem(ROUTE_PREFIX + 'startVenue') || 'NoStartVenue').change();
             $('select[name="endVenue"]').val(localStorage.getItem(ROUTE_PREFIX + 'endVenue') || 'NoEndVenue').change();
             $('#hideDeparted').prop('checked', (localStorage.getItem('hideDeparted') || "true") == "true").change();
         }
-
     </script>
     
     <!-- Global site tag (gtag.js) - Google Analytics -->
