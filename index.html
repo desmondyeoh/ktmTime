@@ -68,6 +68,7 @@
             <h1>ktmTime.dyeoh.com</h1>
             <p id='desc'>
                 A better KTMB train schedule<br/>
+                Last updated: 16 Nov 2019<br/>
             </p>
             <div class="btn-group">
                 <button id="btn-batu" name="route" value="batu">Bt. Caves - P. Sebang</button>
@@ -86,7 +87,6 @@
             <div id="output">Please select 2 different locations to get Schedule</div>
         </main>
         <footer>
-             Last updated: 11 Oct 2019<br/>
              Got newer schedule? <a href="mailto:desmondyeoh11@gmail.com">(Email author)</a><br/>
              Author's: 
              <a href="https://github.com/desmondyeoh">GitHub</a> | 
@@ -105,7 +105,7 @@
       crossorigin="anonymous"></script>
     <!-- <script type="text/javascript" src="https://momentjs.com/downloads/moment.js"></script> -->
 
-    <script type="text/javascript" src="data/data_20191011.js"></script>
+    <script type="text/javascript" src="data/data_20191116.js"></script>
     <script type="text/javascript">
         let ROUTE = "";
         let ROUTE_DATA = {};
@@ -114,13 +114,13 @@
         let PLACES = {};
         $(document).ready(() => {
 
-            if (new Date().getDate()==16) {
-                $.ajax({
-                    url: "data/data_20191116.js",
-                    async: false,
-                    dataType: "script"
-                });
-            }
+//             if (new Date().getDate()==16) {
+//                 $.ajax({
+//                     url: "data/data_20191116.js",
+//                     async: false,
+//                     dataType: "script"
+//                 });
+//             }
             loadSavedState();
             renderSchedule();
             $('.btn-group button').click(function () {
