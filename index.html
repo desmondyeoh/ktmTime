@@ -70,6 +70,9 @@
                 A better KTMB train schedule<br/>
                 Last updated: 16 Nov 2019<br/>
             </p>
+            <form>
+                <input type="button" value="KTM Route Map" onclick="openImage()">
+            </form>
             <div class="btn-group">
                 <button id="btn-batu" name="route" value="batu">Bt. Caves - P. Sebang</button>
                 <button id="btn-klang" name="route" value="klang">Tj. Malim - Klang</button>
@@ -103,6 +106,11 @@
       src="https://code.jquery.com/jquery-3.4.1.min.js"
       integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo="
       crossorigin="anonymous"></script>
+    <script>
+        function openImage() {
+            window.open("./ktm-route.png");
+        }
+    </script>
     <!-- <script type="text/javascript" src="https://momentjs.com/downloads/moment.js"></script> -->
 
     <script type="text/javascript" src="data/data_20191116.js"></script>
